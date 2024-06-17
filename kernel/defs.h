@@ -109,6 +109,8 @@ int either_copyin(void *dst, int user_src, uint64 src, uint64 len);
 void procdump(void);
 void channelinit(void);
 int channel_create(void);
+int channel_put(int, int);
+int channel_take(int, int *);
 
 // swtch.S
 void swtch(struct context *, struct context *);

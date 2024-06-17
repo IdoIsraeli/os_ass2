@@ -731,3 +731,63 @@ int channel_create(void)
   }
   return -1;
 }
+
+int channel_put(int cd, int data)
+{
+  struct channel *c;
+  if (cd < 0 || cd >= NCHANNELS)
+  {
+    // out of bounds
+    return -1;
+  }
+
+  c = &channels[cd];
+  acquire(&c->lock);
+
+  if (c->state == UNUSED_CHANNEL)
+  {
+    // the channel doesn't exist
+    release(&c->lock);
+    return -1;
+  }
+  while (c->state == TAKEABLE_CHANNEL)
+  {
+    sleep(c, &c->lock);
+  }
+  c->data = data;
+  c->state = TAKEABLE_CHANNEL;
+  wakeup(c);
+
+  release(&c->lock);
+  return 0;
+}
+
+int channel_take(int cd, int *data)
+{
+  struct channel *c;
+  if (cd < 0 || cd >= NCHANNELS)
+  {
+    // out of bounds
+    return -1;
+  }
+
+  c = &channels[cd];
+  acquire(&c->lock);
+
+  if (c->state == UNUSED_CHANNEL)
+  {
+    // the channel doesn't exist
+    release(&c->lock);
+    return -1;
+  }
+  while (c->state != TAKEABLE_CHANNEL)
+  {
+    sleep(c, &c->lock);
+  }
+  copyout(myproc()->pagetable, (uint64)data, (char *)&c->data, sizeof(c->data));
+  c->state = USED_CHANNEL;
+  wakeup(c);
+
+  release(&c->lock);
+  return 0;
+}

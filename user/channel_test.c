@@ -13,17 +13,17 @@ int main()
     {
         printf("Channel created. descriptor: %d\n", cd);
     }
-    int cd1 = channel_create();
-    if (cd1 < 0)
-    {
-        printf("Failed to create channel\n");
-        exit(1);
-    }
-    else
-    {
-        printf("Channel created. descriptor: %d\n", cd1);
-    }
-    /*
+    // int cd1 = channel_create();
+    // if (cd1 < 0)
+    // {
+    //     printf("Failed to create channel\n");
+    //     exit(1);
+    // }
+    // else
+    // {
+    //     printf("Channel created. descriptor: %d\n", cd1);
+    // }
+
     if (fork() == 0)
     {
         if (channel_put(cd, 42) < 0)
@@ -32,7 +32,7 @@ int main()
             exit(1);
         }
         channel_put(cd, 43); // Sleeps until cleared // Handle error
-        channel_destroy(cd);
+        // channel_destroy(cd);
         // Handle error
     }
     else
@@ -46,6 +46,6 @@ int main()
         data = channel_take(cd, &data); // Sleep until child destroys channel
         // Handle error
     }
-    */
+
     return 0;
 }

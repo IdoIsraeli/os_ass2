@@ -97,3 +97,15 @@ sys_channel_create(void)
 {
   return channel_create();
 }
+
+uint64
+sys_channel_put(int cd, int data)
+{
+  return channel_put(cd, data);
+}
+
+uint64
+sys_channel_take(int cd, int *data)
+{
+  return channel_take(cd, data);
+}
