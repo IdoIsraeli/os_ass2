@@ -98,8 +98,8 @@ extern uint64 sys_link(void);
 extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
 extern uint64 sys_channel_create(void);
-extern uint64 sys_channel_put(int, int);
-extern uint64 sys_channel_take(int, int *);
+extern uint64 sys_channel_put(void);
+extern uint64 sys_channel_take(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.

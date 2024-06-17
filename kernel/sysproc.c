@@ -99,13 +99,19 @@ sys_channel_create(void)
 }
 
 uint64
-sys_channel_put(int cd, int data)
+sys_channel_put(void)
 {
-  return channel_put(cd, data);
+  int channel_id, data;
+  argint(0, &channel_id);
+  argint(1, &data);
+  return channel_put(channel_id, data);
 }
 
 uint64
-sys_channel_take(int cd, int *data)
+sys_channel_take(void)
 {
-  return channel_take(cd, data);
+  int channel_id, *data;
+  argint(0, &channel_id);
+  argaddr(1, (uint64 *)&data);
+  return channel_take(channel_id, data);
 }
