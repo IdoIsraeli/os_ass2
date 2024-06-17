@@ -129,6 +129,6 @@ struct channel
 {
   enum channelstate state;
   struct spinlock lock;
-  struct proc *owner_pid;
+  struct proc *owner_proc;
   int data;
 };

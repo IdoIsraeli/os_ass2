@@ -67,7 +67,7 @@ void channelinit(void)
   for (c = channels; c < &channels[NCHANNELS]; c++)
   {
     initlock(&c->lock, "channel");
-    c->owner_pid = 0;
+    c->owner_proc = 0;
     c->data = 0;
     c->state = UNUSED;
   }
@@ -401,7 +401,15 @@ void exit(int status)
 
   p->xstate = status;
   p->state = ZOMBIE;
-
+  struct channel *c;
+  for (c = channels; c < &channels[NCHANNELS]; c++)
+  {
+    if (c->owner_proc == p)
+    {
+      channel_destroy(c - channels);
+      printf("destroyed channel in exit %d\n", c - channels);
+    }
+  }
   release(&wait_lock);
 
   // Jump into the scheduler, never to return.
@@ -744,15 +752,15 @@ int channel_put(int cd, int data)
   c = &channels[cd];
   acquire(&c->lock);
 
+  while (c->state == TAKEABLE_CHANNEL)
+  {
+    sleep(c, &c->lock);
+  }
   if (c->state == UNUSED_CHANNEL)
   {
     // the channel doesn't exist
     release(&c->lock);
     return -1;
-  }
-  while (c->state == TAKEABLE_CHANNEL)
-  {
-    sleep(c, &c->lock);
   }
   c->data = data;
   c->state = TAKEABLE_CHANNEL;
@@ -774,20 +782,47 @@ int channel_take(int cd, int *data)
   c = &channels[cd];
   acquire(&c->lock);
 
+  while (c->state == USED_CHANNEL)
+  {
+    sleep(c, &c->lock);
+  }
   if (c->state == UNUSED_CHANNEL)
   {
     // the channel doesn't exist
     release(&c->lock);
     return -1;
   }
-  while (c->state != TAKEABLE_CHANNEL)
-  {
-    sleep(c, &c->lock);
-  }
   copyout(myproc()->pagetable, (uint64)data, (char *)&c->data, sizeof(c->data));
   c->state = USED_CHANNEL;
   wakeup(c);
 
+  release(&c->lock);
+  return 0;
+}
+
+int channel_destroy(int cd)
+{
+  struct channel *c;
+  if (cd < 0 || cd >= NCHANNELS)
+  {
+    // out of bounds
+    return -1;
+  }
+
+  c = &channels[cd];
+  acquire(&c->lock);
+
+  if (c->state == UNUSED_CHANNEL)
+  {
+    // the channel doesn't exist
+    release(&c->lock);
+    return -1;
+  }
+  c->state = UNUSED_CHANNEL;
+  c->data = 0;
+  c->owner_proc = 0;
+  printf("destroyed channel %d\n", cd);
+  wakeup(c);
   release(&c->lock);
   return 0;
 }

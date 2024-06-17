@@ -39,3 +39,4 @@ entry("uptime");
 entry("channel_create");
 entry("channel_put");
 entry("channel_take");
+entry("channel_destroy");

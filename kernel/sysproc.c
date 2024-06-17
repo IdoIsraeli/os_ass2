@@ -115,3 +115,11 @@ sys_channel_take(void)
   argaddr(1, (uint64 *)&data);
   return channel_take(channel_id, data);
 }
+
+uint64
+sys_channel_destroy(void)
+{
+  int channel_id;
+  argint(0, &channel_id);
+  return channel_destroy(channel_id);
+}

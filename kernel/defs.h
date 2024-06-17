@@ -111,6 +111,7 @@ void channelinit(void);
 int channel_create(void);
 int channel_put(int, int);
 int channel_take(int, int *);
+int channel_destroy(int);
 
 // swtch.S
 void swtch(struct context *, struct context *);
