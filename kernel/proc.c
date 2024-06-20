@@ -407,7 +407,6 @@ void exit(int status)
     if (c->owner_proc == p)
     {
       channel_destroy(c - channels);
-      printf("destroyed channel in exit %d\n", c - channels);
     }
   }
   release(&wait_lock);
@@ -732,6 +731,7 @@ int channel_create(void)
     if (c->state == UNUSED_CHANNEL)
     {
       c->state = USED_CHANNEL;
+      c->owner_proc = myproc();
       release(&c->lock);
       return c - channels;
     }
