@@ -17,7 +17,6 @@ int main()
             printf("Failed to put data in channel\n");
             exit(1);
         }
-        exit(0);
         channel_put(cd, 43); // Sleeps until cleared
         // Handle error
         channel_destroy(cd);
@@ -29,17 +28,14 @@ int main()
         if (channel_take(cd, &data) < 0)
         { // 42
             printf("Failed to take data from channel\n");
+
             exit(1);
         }
-        printf("Data received1: %d\n", data);
-        int status;
-        status = channel_take(cd, &data); // 43
-        printf("Data received2: %d\n", data);
-        printf("status: %d\n", status);
+        data = channel_take(cd, &data); // 43
         // Handle error
         data = channel_take(cd, &data); // Sleep until child destroys channel
-
         // Handle error
     }
+
     return 0;
 }
