@@ -98,17 +98,19 @@ int main(int number_of_checkers)
 
         char buff[BUFF_SIZE];
 
-        printf("Do you want the whole thing again? [y / n]\n");
-        gets(buff, BUFF_SIZE);
-
-        if (buff[0] == 'y' || buff[0] == 'Y')
+        while (buff[0] != 'y' || buff[0] != 'Y' || buff[0] != 'n' || buff[0] != 'N')
         {
-            continue;
-        }
-        else
-        {
-            printf("Ciao!\n");
-            exit(0);
+            printf("Do you want the whole thing again? [y / n]\n");
+            gets(buff, BUFF_SIZE);
+            if (buff[0] == 'y' || buff[0] == 'Y')
+            {
+                break;
+            }
+            else if (buff[0] == 'n' || buff[0] == 'N')
+            {
+                printf("Ciao!\n");
+                exit(0);
+            }
         }
     }
 
