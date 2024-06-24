@@ -1,30 +1,29 @@
-#include <stdbool.h>
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "user/user.h"
 
-bool is_prime(int n)
+int is_prime(int n)
 {
     if (n <= 1)
     {
-        return false;
+        return 0;
     }
     if (n <= 3)
     {
-        return true;
+        return 1;
     }
     if (n % 2 == 0 || n % 3 == 0)
     {
-        return false;
+        return 0;
     }
     for (int i = 5; i * i <= n; i = i + 6)
     {
         if (n % i == 0 || n % (i + 2) == 0)
         {
-            return false;
+            return 0;
         }
     }
-    return true;
+    return 1;
 }
 
 int main(int number_of_checkers)
@@ -42,14 +41,14 @@ int main(int number_of_checkers)
             {
                 if (channel_take(cd1, &n) < 0)
                 {
-                    destroy_channel(cd1);
+                    channel_destroy(cd1);
                     exit(0);
                 }
                 if (is_prime(n))
                 {
                     if (channel_put(cd2, n) < 0)
                     {
-                        destroy_channel(cd2);
+                        channel_destroy(cd1);
                         exit(0);
                     }
                 }
@@ -60,15 +59,19 @@ int main(int number_of_checkers)
     {
         // this is the printer code:
         int n;
-        while (1)
+        int counter = 1;
+        while (counter <= 100)
         {
             if (channel_take(cd2, &n) < 0)
             {
-                destroy_channel(cd2);
+                channel_destroy(cd2);
                 exit(0);
             }
-            printf("%d\n", n);
+            printf("%d. %d\n", counter, n);
+            counter++;
         }
+        channel_destroy(cd2);
+        exit(0);
     }
     // this is the main code:
     int i = 2;
