@@ -3,6 +3,8 @@
 #include "user/user.h"
 
 #define BUFF_SIZE 128
+#define DEF_N_CHECKERS 3
+
 int is_prime(int n)
 {
     if (n <= 1)
@@ -27,8 +29,19 @@ int is_prime(int n)
     return 1;
 }
 
-int main(int number_of_checkers)
+int main(int argc, char *argv[])
 {
+    int number_of_checkers;
+    if (argc > 1)
+    {
+        number_of_checkers = atoi(argv[1]);
+    }
+    else
+    {
+        number_of_checkers = DEF_N_CHECKERS;
+    }
+    printf("%d checkers\n", number_of_checkers);
+
     while (1)
     {
         // this is the generator code:
