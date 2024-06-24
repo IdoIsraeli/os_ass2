@@ -1,8 +1,8 @@
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "user/user.h"
-#include <stdio.h>
 
+#define BUFF_SIZE 128
 int is_prime(int n)
 {
     if (n <= 1)
@@ -34,7 +34,7 @@ int main(int number_of_checkers)
         // this is the generator code:
         int cd1 = channel_create();
         int cd2 = channel_create();
-        int pid;
+        int pid = -1;
         for (int i = 0; i < number_of_checkers; i++)
         {
             pid = fork();
@@ -96,11 +96,12 @@ int main(int number_of_checkers)
             i++;
         }
 
-        char choice;
-        printf("Do you want the whole thing again? [y / n]\n");
-        scanf(" %c", &choice);
+        char buff[BUFF_SIZE];
 
-        if (choice == 'y' || choice == 'Y')
+        printf("Do you want the whole thing again? [y / n]\n");
+        gets(buff, BUFF_SIZE);
+
+        if (buff[0] == 'y' || buff[0] == 'Y')
         {
             continue;
         }
