@@ -1,6 +1,7 @@
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "user/user.h"
+#include <stdio.h>
 
 int is_prime(int n)
 {
@@ -28,60 +29,86 @@ int is_prime(int n)
 
 int main(int number_of_checkers)
 {
-    // this is the generator code:
-    int cd1 = channel_create();
-    int cd2 = channel_create();
-    for (int i = 0; i < number_of_checkers; i++)
+    while (1)
     {
-        if (fork() == 0)
+        // this is the generator code:
+        int cd1 = channel_create();
+        int cd2 = channel_create();
+        int pid;
+        for (int i = 0; i < number_of_checkers; i++)
         {
-            // this is the checker code:
-            int n;
-            while (1)
+            pid = fork();
+            if (pid == 0)
             {
-                if (channel_take(cd1, &n) < 0)
+                // this is the checker code:
+                int n;
+                while (1)
                 {
-                    channel_destroy(cd1);
-                    exit(0);
-                }
-                if (is_prime(n))
-                {
-                    if (channel_put(cd2, n) < 0)
+                    if (channel_take(cd1, &n) < 0)
                     {
                         channel_destroy(cd1);
+                        printf("Checker #%d failed taking, PID: %d.\n", i, pid);
                         exit(0);
+                    }
+                    if (is_prime(n))
+                    {
+                        if (channel_put(cd2, n) < 0)
+                        {
+                            channel_destroy(cd1);
+                            printf("Channel 2 unavailable. Exiting checker #%d, PID: %d.\n", i, pid);
+                            exit(0);
+                        }
                     }
                 }
             }
         }
-    }
-    if (fork() == 0)
-    {
-        // this is the printer code:
-        int n;
-        int counter = 1;
-        while (counter <= 100)
+        if (fork() == 0)
         {
-            if (channel_take(cd2, &n) < 0)
+            // this is the printer code:
+            int n;
+            int counter = 1;
+            while (counter <= 100)
             {
-                channel_destroy(cd2);
-                exit(0);
+                if (channel_take(cd2, &n) < 0)
+                {
+                    channel_destroy(cd2);
+                    printf("Printer failed taking, PID: %d.\n", pid);
+                    exit(0);
+                }
+                printf("%d. %d\n", counter, n);
+                counter++;
             }
-            printf("%d. %d\n", counter, n);
-            counter++;
+            channel_destroy(cd2);
+            printf("Reached 100 primes. Exiting printer, PID: %d.\n", pid);
+            exit(0);
         }
-        channel_destroy(cd2);
-        exit(0);
-    }
-    // this is the main code:
-    int i = 2;
-    while (1)
-    {
-        if (channel_put(cd1, i) < 0)
+        // this is the main code:
+        int i = 2;
+        while (1)
         {
-            printf("ask user if he want to do again or exit\n");
+            if (channel_put(cd1, i) < 0)
+            {
+                while (wait(0) > 0)
+                    ;
+                printf("All child processes have exited.\n");
+                break;
+            }
+            i++;
         }
-        i++;
+
+        char choice;
+        printf("Do you want the whole thing again? [y / n]\n");
+        scanf(" %c", &choice);
+
+        if (choice == 'y' || choice == 'Y')
+        {
+            continue;
+        }
+        else
+        {
+            printf("Ciao!\n");
+            exit(0);
+        }
     }
 
     return 0;
